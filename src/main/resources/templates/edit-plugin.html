@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+
+<head xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="static/css/theme.css" th:href="@{/css/theme.css}" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Kaushan+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Karla&display=swap" rel="stylesheet">
+
+
+
+
+    <style>
+        #addNewType,
+        #addNewBrand {
+            display: none;
+        }
+    </style>
+
+    <title>Add a Plugin</title>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="container-fluid">
+            <nav class="mb-4 navbar navbar-expand-lg navbar-dark indigo">
+                <a class="navbar-brand" href="/">FreeVST</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav mr-auto">
+                        <!-- Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">Plugins</a>
+                            <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" th:each="type : ${types}" th:text="${type.name}"
+                                    th:href="${'/plugins-by-type/' + type.name}">Compressors</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link waves-effect waves-light" th:href="@{/top-plugins}">Highest Rated</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <a class="nav-link waves-effect waves-light" th:href="@{/addPlugin}">Add a Plugin</a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <a class="nav-link waves-effect waves-light" th:href="@{/view-all-plugins}">All Plugins</a>
+                        </li>
+
+                    </ul>
+                    <div sec:authorize="isAuthenticated()">
+                        <form class="form-inline" method="POST" action="/logout">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <label for="submit">
+                                Hello : <span th:text="${#authentication.name}">
+                                          </span> &nbsp;&nbsp;&nbsp;|
+                                </label>
+                            <button class="btn btn-link" id="submit" type="submit">Logout</button>
+                        </form>
+                    </div>
+                    <span class="navbar-text white-text">
+                        <a class="nav-item" th:href="${'/login'}"> Log In </a></span>
+
+                </div>
+            </nav>
+        </div>
+
+        <h3><span th:text="${plugin.name}"></span></h3>
+        <form method="POST">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div class="form-group">
+                <label>Plugin Name</label>
+                <input type="text" class="form-control" th:field="${plugin.name}">
+                <div th:if="${#fields.hasErrors('plugin.name')}">
+                    <p th:each="error : ${#fields.errors('plugin.name')}" class="alert alert-danger" th:text="${error}"></p>
+            </div>
+            </div>
+            <div class="form-group" id="selectType">
+                <label>Select the type of plugin</label> <!-- for selecting the type-->
+                <button type="button" class="btn btn-sm btn-outline-secondary py-0" style="font-size: 0.8em;"
+                    id="newType">Add New Type</button>
+
+                <select class="form-control" th:field="${plugin.type.typeId}">
+                    <option th:each="type : ${types}" th:text="${type.name}" th:value="${type.typeId}"></option>
+                </select>
+
+            </div>
+
+            <div class="form-group" id="addNewType">
+                <!-- this div is shown and hidden to add a new type-->
+                <label>Add New Type</label>
+                <input type="text" class="form-control" name="type.name">
+                <button type="button" class="btn btn-sm btn-outline-secondary py-0" style="font-size: 0.8em;"
+                    id="cancelAddNewType">Existing Type</button>
+            </div>
+
+            <div class="form-group">
+                <!-- for selecting the category-->
+                <label>Select the category of plugin</label>
+                <select class="form-control" th:field="${plugin.type.category.categoryId}">
+                    <option th:each="category : ${categories}" th:text="${category.name}"
+                        th:value="${category.categoryId}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Enter the download link for the plugin</label>
+                <input type="text" class="form-control" th:field="${plugin.downloadLink}">
+                <div th:if="${#fields.hasErrors('plugin.downloadLink')}">
+                    <p th:each="error : ${#fields.errors('plugin.downloadLink')}" class="alert alert-danger" th:text="${error}"></p>
+            </div>
+            </div>
+
+            <div class="form-group">
+                <label>Enter an image link for the plugin</label>
+                <input type="text" class="form-control" th:field="${plugin.imageUrl}">
+                <div th:if="${#fields.hasErrors('plugin.imageUrl')}">
+                    <p th:each="error : ${#fields.errors('plugin.imageUrl')}" class="alert alert-danger" th:text="${error}"></p>
+            </div>
+            </div>
+
+
+            <div class="form-group" id="selectBrand">
+                <label>Select the brand of plugin</label> <!-- for selecting the brand-->
+                <button type="button" class="btn btn-sm btn-outline-secondary py-0" style="font-size: 0.8em;"
+                    id="newBrand">Add New Brand</button>
+                <select class="form-control" th:field="${plugin.brand.brandId}">
+                    <option th:each="brand : ${brands}" th:text="${brand.name}" th:value="${brand.brandId}"></option>
+                </select>
+            </div>
+
+            <div id="addNewBrand">
+                <div class="form-group">
+                    <label>Enter a brand name</label> <!-- for adding a new brand-->
+                    <input type="text" class="form-control" name="brand.name">
+                    <label>Enter a brand website link</label> <!-- for adding a new brand-->
+                    <input type="text" class="form-control" name="brand.url">
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0" style="font-size: 0.8em;"
+                        id="cancelAddNewBrand">Existing Brand</button>
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <label>Plugin Notes</label>
+                <textarea class="form-control" rows="3" th:field="${plugin.description}"></textarea>
+                <div th:if="${#fields.hasErrors('plugin.description')}">
+                    <p th:each="error : ${#fields.errors('plugin.description')}" class="alert alert-danger" th:text="${error}"></p>
+            </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
+
+
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script th:src="@{/js/plugins.js}"></script>
+
+
+</body>
+
+</html>
